@@ -1,0 +1,23 @@
+{
+  "name": "libramanager",
+  "version": "1.0.0",
+  "description": "O Libramanager é um sistema backend robusto desenvolvido para facilitar a gestão de bibliotecas. Ele oferece funcionalidades completas para controle de acervo, cadastro de usuários, empréstimos, reservas e devoluções de livros.",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon index.js"
+  },
+  "author": "Vinicius Kauã Developer",
+  "license": "MIT",
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "body-parser": "^1.20.2",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.5.0",
+    "nodemon": "^3.1.4",
+    "sanitize-html": "^2.13.0"
+  }
+}
