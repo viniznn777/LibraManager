@@ -1,13 +1,13 @@
 const bcrypt = require("bcrypt");
-const CompanyLogin = require("../models/companyLoginModel");
+const CompanyRegister = require("../models/companyRegisterModel");
 const Validator = require("../helpers/validator");
 
 const registerCompany = async (req, res) => {
-  let { companyName, email, password } = req.body;
+  let { name, email, password } = req.body;
 
   // SANITIZAR OS CAMPOS PARA REMOVER CARACTERES ESPECIAIS ( PROTEÇÃO CONTRA INJEÇÃO DE CÓDIGO OU XSS (CROSS-SITE-SCRIPTING) )
-  ({ companyName, email, password } = Validator.sanitizeData({
-    companyName,
+  ({ name, email, password } = Validator.sanitizeData({
+    name,
     email,
     password,
   }));
@@ -15,13 +15,13 @@ const registerCompany = async (req, res) => {
   try {
     if (
       Validator.validateRegistration({
-        name: companyName,
+        name: name,
         email,
         pass: password,
       })
     ) {
       // VERIFICANDO SE O EMAIL INSERIDO JÁ É EXISTENTE NO BANCO DO DADOS
-      const existingUser = await CompanyLogin.findOne({ email: email });
+      const existingUser = await CompanyRegister.findOne({ email: email });
 
       if (existingUser) {
         return res.status(400).json({ message: "Email is already in use!" });
@@ -31,15 +31,17 @@ const registerCompany = async (req, res) => {
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(password, salt);
 
-      const newCompany = new CompanyLogin({
-        email: email,
+      const newCompany = new CompanyRegister({
+        name,
+        email,
         password: hashedPassword,
-        companyName: companyName,
       });
       // SALVANDO NO BANCO DE DADOS
       await newCompany.save();
 
-      return res.status(201).json({ message: "Company created successfuly!" });
+      return res
+        .status(201)
+        .json({ message: "Company created successfuly!", newCompany });
     }
   } catch (err) {
     console.log(err);
