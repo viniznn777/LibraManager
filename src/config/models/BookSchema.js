@@ -18,7 +18,7 @@ const bookSchema = new mongoose.Schema({
 
 // Índice para evitar duplicação de title e author dentro da mesma empresa
 bookSchema.index({ title: 1, author: 1, company: 1 }, { unique: true });
-// Ao registrar um novo book. Houve erro E11000, fui ao mongo ATLAS e fiz um drop index na collection de books, pois havia 2 index anteriores repetidos causando conflito na adição do mesmo livro no login de outra empresa
+// Ao registrar um novo book. Houve erro E11000, fui ao mongo ATLAS e fiz um drop index na collection de books, pois havia 2 index anteriores repetidos, causando conflito na adição do mesmo livro no login de outra empresa
 /*
 
 >title_1_author_1 = Excluímos este e deixamos apenas o de baixo.

@@ -15,8 +15,8 @@ const registerBook = async (req, res) => {
 
   try {
     // Verificar se a empresa existe
-    const findCompany = await CompanyRegister.findById(company);
-    if (!findCompany) {
+    const companyFound = await CompanyRegister.findById(company);
+    if (!companyFound) {
       return res.status(404).json({ message: "Company not found" });
     }
 
@@ -44,9 +44,29 @@ const registerBook = async (req, res) => {
 
     await newBook.save();
 
+    // Verificar se a categoria inserida já existe no Array categories. Se não existe, será adicionado a lista de categorias de livros na biblioteca.
+    const categoryExists = companyFound.categories.includes(category);
+
+    if (categoryExists) {
+      return {
+        success: true,
+        message: "Category already exists, no action taken",
+      };
+    } else {
+      companyFound.categories.push(category);
+      await companyFound.save();
+    }
+
+    // Adicionar o livro à lista apropriada na empresa
+    if (status === "available") {
+      companyFound.availableBooks.push(newBook._id);
+    } else {
+      companyFound.borrowedBooks.push(newBook._id);
+    }
+
     // Adicionar o livro à empresa
-    findCompany.books.push(newBook._id);
-    await findCompany.save();
+    companyFound.books.push(newBook._id);
+    await companyFound.save();
 
     return res
       .status(201)
