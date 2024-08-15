@@ -1,6 +1,7 @@
 const bcrypt = require("bcrypt");
 const CompanyRegister = require("../models/companyRegisterModel");
 const Validator = require("../helpers/validator");
+const generateToken = require("../helpers/generateToken");
 
 const registerCompany = async (req, res) => {
   let { name, email, password } = req.body;
@@ -49,6 +50,60 @@ const registerCompany = async (req, res) => {
   }
 };
 
+const loginCompany = async (req, res) => {
+  let { email, password } = req.body;
+
+  // SANITIZAR OS CAMPOS PARA REMOVER CARACTERES ESPECIAIS ( PROTEÇÃO CONTRA INJEÇÃO DE CÓDIGO OU XSS (CROSS-SITE-SCRIPTING) )
+  ({ email, password } = Validator.sanitizeData({
+    email,
+    password,
+  }));
+
+  try {
+    if (!Validator.validateLogin({ email, pass: password })) {
+      return res.status(400).json({ message: "Invalid Login" });
+    }
+
+    const foundedCompany = await CompanyRegister.findOne({ email: email });
+
+    if (!foundedCompany) {
+      return res.status(400).json({ message: "Invalid Credentials" });
+    }
+
+    bcrypt.compare(password, foundedCompany.password, (err, isMatch) => {
+      if (err) return done(err);
+
+      if (isMatch) {
+        const token = generateToken(foundedCompany);
+        res.cookie("token", token, {
+          domain: "localhost",
+          path: "/",
+          httpOnly: true,
+          secure: false,
+        });
+
+        res.cookie("id", foundedCompany._id.toString(), {
+          domain: "localhost",
+          path: "/",
+          httpOnly: true,
+          secure: false,
+        });
+
+        console.log("Token cookie:", token);
+        console.log("ID cookie:", foundedCompany._id.toString());
+
+        return res.status(200).json({ CompanyName: foundedCompany.name });
+      } else {
+        return res.status(400).json({ message: "Invalid credentials!" });
+      }
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ message: "Error in registration" });
+  }
+};
+
 module.exports = {
   registerCompany,
+  loginCompany,
 };
