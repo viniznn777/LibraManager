@@ -1,6 +1,67 @@
 const Book = require("../models/BookSchema");
 const CompanyRegister = require("../models/companyRegisterModel");
 
+// Função para listar todos os livros de uma empresa
+const getAllBooks = async (req, res) => {
+  try {
+    const books = await Book.find({ company: req.Company });
+
+    if (books.length === 0) {
+      return res.status(204).send(); // Status 204: No Content
+    }
+
+    res.status(200).json({ message: "Company Books", data: books });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Error when fetching company books" });
+  }
+};
+
+// Função para listar todos os livros disponíveis de uma empresa
+const getAvailableBooks = async (req, res) => {
+  try {
+    const availableBooks = await Book.find({
+      status: "available",
+      company: req.Company,
+    });
+
+    if (availableBooks.length === 0) {
+      return res.status(204).send(); // Status 204: No Content
+    }
+
+    res.status(200).json({
+      message: "Books available at the company",
+      data: availableBooks,
+    });
+  } catch (err) {
+    console.error(err);
+    res
+      .status(500)
+      .json({ message: "Error when fetching Books available at the company" });
+  }
+};
+
+// Função para listar todos os livros emprestados de uma empresa
+const getBorrowedBooks = async (req, res) => {
+  try {
+    const borrowedBooks = await Book.find({ status: "borrowed" });
+
+    if (borrowedBooks.length === 0) {
+      return res.status(204).send(); // Status 204: No Content
+    }
+
+    res.status(200).json({
+      message: "Borrowed books at the company",
+      data: borrowedBooks,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      message: "Error when fetching borrowed books at the company",
+    });
+  }
+};
+
 // Função para atualizar o status de um livro
 const updateBookStatus = async (req, res) => {
   // Extrai os dados bookId e newStatus do corpo da requisição
@@ -68,4 +129,9 @@ const updateBookStatus = async (req, res) => {
 };
 
 // Exporta a função updateBookStatus para uso em outros arquivos
-module.exports = { updateBookStatus };
+module.exports = {
+  updateBookStatus,
+  getAllBooks,
+  getAvailableBooks,
+  getBorrowedBooks,
+};
