@@ -3,7 +3,7 @@ const Book = require("../models/BookSchema");
 const CompanyRegister = require("../models/companyRegisterModel");
 
 const registerBook = async (req, res) => {
-  let { title, author, category, status, company } = req.body; // Neste caso o company será recebido do front-end, pois o servidor retornou em forma de cookie quando o usuário fez o login na aplicação.
+  let { title, author, category, status, company } = req.body;
 
   ({ title, author, category, status, company } = Validator.sanitizeData({
     title,
@@ -44,28 +44,24 @@ const registerBook = async (req, res) => {
 
     await newBook.save();
 
-    // Verificar se a categoria inserida já existe no Array categories. Se não existe, será adicionado a lista de categorias de livros na biblioteca.
+    // Verificar se a categoria inserida já existe no Array categories.
     const categoryExists = companyFound.categories.includes(category);
 
-    if (categoryExists) {
-      return {
-        success: true,
-        message: "Category already exists, no action taken",
-      };
-    } else {
+    if (!categoryExists) {
       companyFound.categories.push(category);
-      await companyFound.save();
     }
 
     // Adicionar o livro à lista apropriada na empresa
-    if (status === "available") {
+    if (status === "available" || !status) {
       companyFound.availableBooks.push(newBook._id);
     } else {
       companyFound.borrowedBooks.push(newBook._id);
     }
 
-    // Adicionar o livro à empresa
+    // Adicionar o livro à lista geral de livros da empresa
     companyFound.books.push(newBook._id);
+
+    // Salvar as alterações na empresa
     await companyFound.save();
 
     return res

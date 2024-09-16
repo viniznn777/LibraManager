@@ -128,10 +128,45 @@ const updateBookStatus = async (req, res) => {
   }
 };
 
+const deleteBook = async (req, res) => {
+  try {
+    const { bookId } = req.body;
+
+    // Verifica se o livro existe
+    const book = await Book.findById(bookId);
+    if (!book) {
+      return res.status(404).json({ message: "Book not found" });
+    }
+
+    // Encontra a empresa
+    const company = await CompanyRegister.findById(req.Company);
+    if (!company) {
+      return res.status(404).json({ message: "Company not found" });
+    }
+
+    // Remove o livro da empresa
+    company.books = company.books.filter((id) => !id.equals(bookId));
+
+    // Salva as alterações na empresa
+    await company.save();
+
+    // Remove o livro do banco de dados
+    await Book.findByIdAndDelete(bookId);
+
+    res.status(200).json({
+      message: `Book with id ${bookId} successfully deleted from ${company.name} Library!`,
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "Error deleting book!" });
+  }
+};
+
 // Exporta a função updateBookStatus para uso em outros arquivos
 module.exports = {
   updateBookStatus,
   getAllBooks,
   getAvailableBooks,
   getBorrowedBooks,
+  deleteBook,
 };

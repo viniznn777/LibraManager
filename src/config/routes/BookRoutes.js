@@ -45,4 +45,11 @@ routes.get("/books", verifyToken, verifyUserId, async (req, res) => {
   }
 });
 
+routes.delete(
+  "/delete",
+  verifyToken,
+  verifyUserId,
+  bookStatusController.deleteBook
+);
+
 module.exports = routes;
